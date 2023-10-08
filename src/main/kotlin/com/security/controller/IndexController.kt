@@ -3,6 +3,8 @@ package com.security.controller
 import com.security.entity.User
 import com.security.enums.UserRoleEnum
 import com.security.repository.UserRepository
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -56,6 +58,20 @@ class IndexController(
         user.role = UserRoleEnum.ROLE_USER
         userRepository.save(user)
         return "redirect:/loginForm"
+    }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/info")
+    @ResponseBody
+    fun info(): String {
+        return "개인정보"
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @GetMapping("/data")
+    @ResponseBody
+    fun data(): String {
+        return "데이터 정보"
     }
 
 }
