@@ -1,11 +1,21 @@
 package com.security.controller
 
+import com.security.entity.User
+import com.security.enums.UserRoleEnum
+import com.security.repository.UserRepository
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.ResponseBody
+import kotlin.math.log
 
 @Controller
-class IndexController {
+class IndexController(
+    val userRepository: UserRepository,
+    val passwordEncoder: BCryptPasswordEncoder
+) {
 
     @GetMapping("/")
     fun home(): String {
@@ -29,20 +39,23 @@ class IndexController {
     fun manager(): String {
         return "manager"
     }
-    @GetMapping("/login")
-    fun login(): String {
-        return "login"
+    @GetMapping("/loginForm")
+    fun loginForm(): String {
+        return "loginForm"
     }
 
-    @GetMapping("/join")
-    @ResponseBody
-    fun join(): String {
-        return "join"
+    @GetMapping("/joinForm")
+    fun joinForm(): String {
+        return "joinForm"
     }
 
-    @GetMapping("/joinProc")
-    @ResponseBody
-    fun joinProc(): String {
-        return "회원가입 완료됨"
+    @PostMapping("/join")
+    fun join(request: User): String {
+        val encodePassword = passwordEncoder.encode(request.password)
+        val user = User(request.userName, encodePassword, request.email)
+        user.role = UserRoleEnum.ROLE_USER
+        userRepository.save(user)
+        return "redirect:/loginForm"
     }
+
 }
